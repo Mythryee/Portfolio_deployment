@@ -1,0 +1,44 @@
+# php-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: php-app
+spec:
+  replicas: 2                  # for rolling updates
+  selector:
+    matchLabels:
+      app: php-app
+  template:
+    metadata:
+      labels:
+        app: php-app
+    spec:
+      containers:
+      - name: php
+        image: mythryee/portfolio:v1
+        ports:
+        - containerPort: 80
+        env:
+        - name: MYSQL_HOST
+          value: mysql
+        - name: MYSQL_DATABASE
+          value: portfolio
+        - name: MYSQL_USER
+          value: portfolio_user
+        - name: MYSQL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mysql-secret
+              key: user-password
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: php-service
+spec:
+  type: LoadBalancer
+  ports:
+    - port: 80
+      targetPort: 80
+  selector:
+    app: php-app

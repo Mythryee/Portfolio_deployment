@@ -1,0 +1,38 @@
+services:
+  php:
+    build: .
+    container_name: php-container
+    ports:
+      - "8000:80"
+    volumes:
+      - ./public:/var/www/html/public
+      - ./includes:/var/www/html/includes
+      - ./components:/var/www/html/components
+      - ./phpmailer:/var/www/html/phpmailer
+    depends_on:
+      - mysql
+    networks:
+      - mynetwork
+
+  mysql:
+    image: mysql:8.0
+    container_name: mysql-container
+    restart: always
+    env_file:
+      - .env
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    volumes:
+      - ./sql:/docker-entrypoint-initdb.d
+      - mysql_data:/var/lib/mysql
+    networks:
+      - mynetwork
+
+networks:
+  mynetwork:
+
+volumes:
+  mysql_data:
